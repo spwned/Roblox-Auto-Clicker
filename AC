@@ -1,20 +1,16 @@
--- Modern AutoClicker GUI with Smooth Animations
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
--- Settings
 getgenv().AutoClicker = getgenv().AutoClicker or false
 getgenv().ClickSpeed = getgenv().ClickSpeed or 1
 getgenv().ToggleKey = getgenv().ToggleKey or Enum.KeyCode.Q
 
--- Create ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AutoClickerGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.CoreGui
 
--- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 280, 0, 0)
@@ -24,12 +20,10 @@ MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
--- Add rounded corners
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
--- Add shadow effect
 local Shadow = Instance.new("ImageLabel")
 Shadow.Name = "Shadow"
 Shadow.BackgroundTransparency = 1
@@ -43,7 +37,6 @@ Shadow.ScaleType = Enum.ScaleType.Slice
 Shadow.SliceCenter = Rect.new(10, 10, 118, 118)
 Shadow.Parent = MainFrame
 
--- Title Bar
 local TitleBar = Instance.new("Frame")
 TitleBar.Name = "TitleBar"
 TitleBar.Size = UDim2.new(1, 0, 0, 40)
@@ -55,7 +48,6 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 12)
 TitleCorner.Parent = TitleBar
 
--- Title Text
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
@@ -67,7 +59,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleBar
 
--- Close Button
 local CloseButton = Instance.new("TextButton")
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Position = UDim2.new(1, -35, 0, 5)
@@ -83,7 +74,6 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 8)
 CloseCorner.Parent = CloseButton
 
--- Content Frame
 local Content = Instance.new("Frame")
 Content.Name = "Content"
 Content.Size = UDim2.new(1, -30, 1, -55)
@@ -91,7 +81,6 @@ Content.Position = UDim2.new(0, 15, 0, 45)
 Content.BackgroundTransparency = 1
 Content.Parent = MainFrame
 
--- Status Indicator
 local StatusFrame = Instance.new("Frame")
 StatusFrame.Size = UDim2.new(1, 0, 0, 50)
 StatusFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
@@ -124,7 +113,6 @@ StatusText.Font = Enum.Font.GothamMedium
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 StatusText.Parent = StatusFrame
 
--- CPS Slider
 local CPSLabel = Instance.new("TextLabel")
 CPSLabel.Size = UDim2.new(1, 0, 0, 20)
 CPSLabel.Position = UDim2.new(0, 0, 0, 65)
@@ -169,7 +157,6 @@ local ButtonCorner = Instance.new("UICorner")
 ButtonCorner.CornerRadius = UDim.new(1, 0)
 ButtonCorner.Parent = SliderButton
 
--- Keybind Button
 local KeybindButton = Instance.new("TextButton")
 KeybindButton.Size = UDim2.new(1, 0, 0, 40)
 KeybindButton.Position = UDim2.new(0, 0, 0, 115)
@@ -185,7 +172,6 @@ local KeybindCorner = Instance.new("UICorner")
 KeybindCorner.CornerRadius = UDim.new(0, 10)
 KeybindCorner.Parent = KeybindButton
 
--- Functions
 local function UpdateStatus(active)
     local color = active and Color3.fromRGB(75, 255, 150) or Color3.fromRGB(255, 75, 75)
     local text = active and "Active" or "Inactive"
@@ -201,7 +187,7 @@ local function update(input)
 end
 
 TitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
@@ -215,7 +201,7 @@ TitleBar.InputBegan:Connect(function(input)
 end)
 
 TitleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
@@ -226,37 +212,35 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Slider Logic
 local sliding = false
 SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         sliding = true
     end
 end)
 
 SliderButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         sliding = false
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if sliding and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local mousePos = UserInputService:GetMouseLocation().X
+    if sliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local inputPos = input.UserInputType == Enum.UserInputType.Touch and input.Position.X or UserInputService:GetMouseLocation().X
         local sliderPos = SliderBG.AbsolutePosition.X
         local sliderSize = SliderBG.AbsoluteSize.X
-        local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
+        local percent = math.clamp((inputPos - sliderPos) / sliderSize, 0, 1)
         
         TweenService:Create(SliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
         TweenService:Create(SliderButton, TweenInfo.new(0.1), {Position = UDim2.new(percent, -9, 0.5, -9)}):Play()
         
-        local cps = math.floor(1 + (percent * 29)) -- 1 to 30 CPS
+        local cps = math.floor(1 + (percent * 29))
         getgenv().ClickSpeed = 1 / cps
         CPSLabel.Text = "CPS: " .. cps
     end
 end)
 
--- Keybind Logic
 local waitingForKey = false
 KeybindButton.MouseButton1Click:Connect(function()
     waitingForKey = true
@@ -274,14 +258,14 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Close Button
 CloseButton.MouseButton1Click:Connect(function()
+    getgenv().AutoClicker = false
+    getgenv().AutoClickerRunning = false
     TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 0)}):Play()
     wait(0.3)
     ScreenGui:Destroy()
 end)
 
--- Hover Effects
 CloseButton.MouseEnter:Connect(function()
     TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 75, 75)}):Play()
 end)
@@ -290,11 +274,15 @@ CloseButton.MouseLeave:Connect(function()
     TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 55)}):Play()
 end)
 
--- AutoClicker Logic
+getgenv().AutoClickerRunning = true
+
 spawn(function()
-    while true do
-        if getgenv().AutoClicker then
-            mouse1click()
+    while getgenv().AutoClickerRunning do
+        if getgenv().AutoClicker and UserInputService:GetFocusedTextBox() == nil then
+            local windowFocused = UserInputService.WindowFocused
+            if windowFocused then
+                mouse1click()
+            end
             task.wait(getgenv().ClickSpeed)
         else
             task.wait(0.1)
@@ -302,7 +290,6 @@ spawn(function()
     end
 end)
 
--- Animate GUI opening
 TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 280, 0, 200)}):Play()
 
 UpdateStatus(getgenv().AutoClicker)
