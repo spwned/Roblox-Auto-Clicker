@@ -1,0 +1,346 @@
+-- Modern AutoClicker GUI with Smooth Animations
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Settings
+getgenv().AutoClicker = getgenv().AutoClicker or false
+getgenv().ClickSpeed = getgenv().ClickSpeed or 0.001
+getgenv().ToggleKey = getgenv().ToggleKey or Enum.KeyCode.Q
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AutoClickerGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game.CoreGui
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 280, 0, 0)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+-- Add shadow effect
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.BackgroundTransparency = 1
+Shadow.Position = UDim2.new(0, -15, 0, -15)
+Shadow.Size = UDim2.new(1, 30, 1, 30)
+Shadow.ZIndex = 0
+Shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.5
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+Shadow.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 12)
+TitleCorner.Parent = TitleBar
+
+-- Title Text
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "⚡ AutoClicker"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
+
+-- Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+MinimizeButton.Position = UDim2.new(1, -70, 0, 5)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+MinimizeButton.Text = "─"
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.TextSize = 18
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.BorderSizePixel = 0
+MinimizeButton.Parent = TitleBar
+
+local MinimizeCorner = Instance.new("UICorner")
+MinimizeCorner.CornerRadius = UDim.new(0, 8)
+MinimizeCorner.Parent = MinimizeButton
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+CloseButton.Text = "×"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 20
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.BorderSizePixel = 0
+CloseButton.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseButton
+
+-- Content Frame
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1, -30, 1, -55)
+Content.Position = UDim2.new(0, 15, 0, 45)
+Content.BackgroundTransparency = 1
+Content.Parent = MainFrame
+
+-- Status Indicator
+local StatusFrame = Instance.new("Frame")
+StatusFrame.Size = UDim2.new(1, 0, 0, 50)
+StatusFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+StatusFrame.BorderSizePixel = 0
+StatusFrame.Parent = Content
+
+local StatusCorner = Instance.new("UICorner")
+StatusCorner.CornerRadius = UDim.new(0, 10)
+StatusCorner.Parent = StatusFrame
+
+local StatusIndicator = Instance.new("Frame")
+StatusIndicator.Size = UDim2.new(0, 12, 0, 12)
+StatusIndicator.Position = UDim2.new(0, 15, 0.5, -6)
+StatusIndicator.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
+StatusIndicator.BorderSizePixel = 0
+StatusIndicator.Parent = StatusFrame
+
+local IndicatorCorner = Instance.new("UICorner")
+IndicatorCorner.CornerRadius = UDim.new(1, 0)
+IndicatorCorner.Parent = StatusIndicator
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, -40, 1, 0)
+StatusText.Position = UDim2.new(0, 35, 0, 0)
+StatusText.BackgroundTransparency = 1
+StatusText.Text = "Inactive"
+StatusText.TextColor3 = Color3.fromRGB(200, 200, 200)
+StatusText.TextSize = 14
+StatusText.Font = Enum.Font.GothamMedium
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+StatusText.Parent = StatusFrame
+
+-- CPS Slider
+local CPSLabel = Instance.new("TextLabel")
+CPSLabel.Size = UDim2.new(1, 0, 0, 20)
+CPSLabel.Position = UDim2.new(0, 0, 0, 65)
+CPSLabel.BackgroundTransparency = 1
+CPSLabel.Text = "CPS: " .. math.floor(1 / getgenv().ClickSpeed)
+CPSLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+CPSLabel.TextSize = 13
+CPSLabel.Font = Enum.Font.GothamMedium
+CPSLabel.TextXAlignment = Enum.TextXAlignment.Left
+CPSLabel.Parent = Content
+
+local SliderBG = Instance.new("Frame")
+SliderBG.Size = UDim2.new(1, 0, 0, 6)
+SliderBG.Position = UDim2.new(0, 0, 0, 90)
+SliderBG.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+SliderBG.BorderSizePixel = 0
+SliderBG.Parent = Content
+
+local SliderCorner = Instance.new("UICorner")
+SliderCorner.CornerRadius = UDim.new(1, 0)
+SliderCorner.Parent = SliderBG
+
+local SliderFill = Instance.new("Frame")
+SliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(120, 120, 255)
+SliderFill.BorderSizePixel = 0
+SliderFill.Parent = SliderBG
+
+local FillCorner = Instance.new("UICorner")
+FillCorner.CornerRadius = UDim.new(1, 0)
+FillCorner.Parent = SliderFill
+
+local SliderButton = Instance.new("TextButton")
+SliderButton.Size = UDim2.new(0, 18, 0, 18)
+SliderButton.Position = UDim2.new(0.5, -9, 0.5, -9)
+SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SliderButton.Text = ""
+SliderButton.BorderSizePixel = 0
+SliderButton.Parent = SliderBG
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(1, 0)
+ButtonCorner.Parent = SliderButton
+
+-- Keybind Button
+local KeybindButton = Instance.new("TextButton")
+KeybindButton.Size = UDim2.new(1, 0, 0, 40)
+KeybindButton.Position = UDim2.new(0, 0, 0, 115)
+KeybindButton.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+KeybindButton.Text = "Toggle Key: " .. getgenv().ToggleKey.Name
+KeybindButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+KeybindButton.TextSize = 13
+KeybindButton.Font = Enum.Font.GothamMedium
+KeybindButton.BorderSizePixel = 0
+KeybindButton.Parent = Content
+
+local KeybindCorner = Instance.new("UICorner")
+KeybindCorner.CornerRadius = UDim.new(0, 10)
+KeybindCorner.Parent = KeybindButton
+
+-- Functions
+local isMinimized = false
+
+local function UpdateStatus(active)
+    local color = active and Color3.fromRGB(75, 255, 150) or Color3.fromRGB(255, 75, 75)
+    local text = active and "Active" or "Inactive"
+    
+    TweenService:Create(StatusIndicator, TweenInfo.new(0.3), {BackgroundColor3 = color}):Play()
+    StatusText.Text = text
+end
+
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    TweenService:Create(MainFrame, TweenInfo.new(0.1), {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}):Play()
+end
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Slider Logic
+local sliding = false
+SliderButton.MouseButton1Down:Connect(function()
+    sliding = true
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        sliding = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if sliding and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = UserInputService:GetMouseLocation().X
+        local sliderPos = SliderBG.AbsolutePosition.X
+        local sliderSize = SliderBG.AbsoluteSize.X
+        local percent = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
+        
+        TweenService:Create(SliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
+        TweenService:Create(SliderButton, TweenInfo.new(0.1), {Position = UDim2.new(percent, -9, 0.5, -9)}):Play()
+        
+        local cps = math.floor(1 + (percent * 29)) -- 1 to 30 CPS
+        getgenv().ClickSpeed = 1 / cps
+        CPSLabel.Text = "CPS: " .. cps
+    end
+end)
+
+-- Keybind Logic
+local waitingForKey = false
+KeybindButton.MouseButton1Click:Connect(function()
+    waitingForKey = true
+    KeybindButton.Text = "Press any key..."
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if waitingForKey and input.UserInputType == Enum.UserInputType.Keyboard then
+        getgenv().ToggleKey = input.KeyCode
+        KeybindButton.Text = "Toggle Key: " .. input.KeyCode.Name
+        waitingForKey = false
+    elseif input.KeyCode == getgenv().ToggleKey and not gameProcessed then
+        getgenv().AutoClicker = not getgenv().AutoClicker
+        UpdateStatus(getgenv().AutoClicker)
+    end
+end)
+
+-- Minimize Button Logic
+MinimizeButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    local targetSize = isMinimized and UDim2.new(0, 280, 0, 40) or UDim2.new(0, 280, 0, 200)
+    MinimizeButton.Text = isMinimized and "+" or "─"
+    
+    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = targetSize}):Play()
+end)
+
+-- Close Button
+CloseButton.MouseButton1Click:Connect(function()
+    TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 0)}):Play()
+    wait(0.3)
+    ScreenGui:Destroy()
+end)
+
+-- Hover Effects
+MinimizeButton.MouseEnter:Connect(function()
+    TweenService:Create(MinimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 80)}):Play()
+end)
+
+MinimizeButton.MouseLeave:Connect(function()
+    TweenService:Create(MinimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 55)}):Play()
+end)
+
+CloseButton.MouseEnter:Connect(function()
+    TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 75, 75)}):Play()
+end)
+
+CloseButton.MouseLeave:Connect(function()
+    TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 55)}):Play()
+end)
+
+-- AutoClicker Logic
+local VirtualInputManager = game:GetService("VirtualInputManager")
+spawn(function()
+    while true do
+        if getgenv().AutoClicker then
+            local mousePos = UserInputService:GetMouseLocation()
+            VirtualInputManager:SendMouseButtonEvent(mousePos.X, mousePos.Y, 0, true, game, 0)
+            task.wait(0.01)
+            VirtualInputManager:SendMouseButtonEvent(mousePos.X, mousePos.Y, 0, false, game, 0)
+            task.wait(getgenv().ClickSpeed)
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+
+-- Animate GUI opening
+TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 280, 0, 200)}):Play()
+
+UpdateStatus(getgenv().AutoClicker)
+print("AutoClicker GUI loaded! Press " .. getgenv().ToggleKey.Name .. " to toggle.")
