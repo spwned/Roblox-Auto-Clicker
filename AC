@@ -4,7 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Settings
 getgenv().AutoClicker = getgenv().AutoClicker or false
-getgenv().ClickSpeed = getgenv().ClickSpeed or 0.001
+getgenv().ClickSpeed = getgenv().ClickSpeed or 1
 getgenv().ToggleKey = getgenv().ToggleKey or Enum.KeyCode.Q
 
 -- Create ScreenGui
@@ -148,7 +148,7 @@ SliderCorner.CornerRadius = UDim.new(1, 0)
 SliderCorner.Parent = SliderBG
 
 local SliderFill = Instance.new("Frame")
-SliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+SliderFill.Size = UDim2.new(0, 0, 1, 0)
 SliderFill.BackgroundColor3 = Color3.fromRGB(120, 120, 255)
 SliderFill.BorderSizePixel = 0
 SliderFill.Parent = SliderBG
@@ -159,7 +159,7 @@ FillCorner.Parent = SliderFill
 
 local SliderButton = Instance.new("TextButton")
 SliderButton.Size = UDim2.new(0, 18, 0, 18)
-SliderButton.Position = UDim2.new(0.5, -9, 0.5, -9)
+SliderButton.Position = UDim2.new(0, -9, 0.5, -9)
 SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.Text = ""
 SliderButton.BorderSizePixel = 0
@@ -228,11 +228,13 @@ end)
 
 -- Slider Logic
 local sliding = false
-SliderButton.MouseButton1Down:Connect(function()
-    sliding = true
+SliderButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        sliding = true
+    end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
+SliderButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         sliding = false
     end
@@ -248,7 +250,7 @@ UserInputService.InputChanged:Connect(function(input)
         TweenService:Create(SliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
         TweenService:Create(SliderButton, TweenInfo.new(0.1), {Position = UDim2.new(percent, -9, 0.5, -9)}):Play()
         
-        local cps = math.floor(10 + (percent * 990)) -- 10 to 1000 CPS
+        local cps = math.floor(1 + (percent * 29)) -- 1 to 30 CPS
         getgenv().ClickSpeed = 1 / cps
         CPSLabel.Text = "CPS: " .. cps
     end
@@ -266,7 +268,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         getgenv().ToggleKey = input.KeyCode
         KeybindButton.Text = "Toggle Key: " .. input.KeyCode.Name
         waitingForKey = false
-    elseif input.KeyCode == getgenv().ToggleKey and not gameProcessed then
+    elseif input.KeyCode == getgenv().ToggleKey and not gameProcessed and not waitingForKey then
         getgenv().AutoClicker = not getgenv().AutoClicker
         UpdateStatus(getgenv().AutoClicker)
     end
