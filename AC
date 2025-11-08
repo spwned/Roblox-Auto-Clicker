@@ -57,7 +57,7 @@ TitleCorner.Parent = TitleBar
 
 -- Title Text
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "⚡ AutoClicker"
@@ -66,22 +66,6 @@ Title.TextSize = 16
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleBar
-
--- Minimize Button
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-MinimizeButton.Position = UDim2.new(1, -70, 0, 5)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-MinimizeButton.Text = "─"
-MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeButton.TextSize = 18
-MinimizeButton.Font = Enum.Font.GothamBold
-MinimizeButton.BorderSizePixel = 0
-MinimizeButton.Parent = TitleBar
-
-local MinimizeCorner = Instance.new("UICorner")
-MinimizeCorner.CornerRadius = UDim.new(0, 8)
-MinimizeCorner.Parent = MinimizeButton
 
 -- Close Button
 local CloseButton = Instance.new("TextButton")
@@ -202,8 +186,6 @@ KeybindCorner.CornerRadius = UDim.new(0, 10)
 KeybindCorner.Parent = KeybindButton
 
 -- Functions
-local isMinimized = false
-
 local function UpdateStatus(active)
     local color = active and Color3.fromRGB(75, 255, 150) or Color3.fromRGB(255, 75, 75)
     local text = active and "Active" or "Inactive"
@@ -266,7 +248,7 @@ UserInputService.InputChanged:Connect(function(input)
         TweenService:Create(SliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
         TweenService:Create(SliderButton, TweenInfo.new(0.1), {Position = UDim2.new(percent, -9, 0.5, -9)}):Play()
         
-        local cps = math.floor(1 + (percent * 29)) -- 1 to 30 CPS
+        local cps = math.floor(10 + (percent * 990)) -- 10 to 1000 CPS
         getgenv().ClickSpeed = 1 / cps
         CPSLabel.Text = "CPS: " .. cps
     end
@@ -290,15 +272,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Minimize Button Logic
-MinimizeButton.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    local targetSize = isMinimized and UDim2.new(0, 280, 0, 40) or UDim2.new(0, 280, 0, 200)
-    MinimizeButton.Text = isMinimized and "+" or "─"
-    
-    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = targetSize}):Play()
-end)
-
 -- Close Button
 CloseButton.MouseButton1Click:Connect(function()
     TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 0)}):Play()
@@ -307,14 +280,6 @@ CloseButton.MouseButton1Click:Connect(function()
 end)
 
 -- Hover Effects
-MinimizeButton.MouseEnter:Connect(function()
-    TweenService:Create(MinimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 80)}):Play()
-end)
-
-MinimizeButton.MouseLeave:Connect(function()
-    TweenService:Create(MinimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 55)}):Play()
-end)
-
 CloseButton.MouseEnter:Connect(function()
     TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 75, 75)}):Play()
 end)
@@ -324,14 +289,10 @@ CloseButton.MouseLeave:Connect(function()
 end)
 
 -- AutoClicker Logic
-local VirtualInputManager = game:GetService("VirtualInputManager")
 spawn(function()
     while true do
         if getgenv().AutoClicker then
-            local mousePos = UserInputService:GetMouseLocation()
-            VirtualInputManager:SendMouseButtonEvent(mousePos.X, mousePos.Y, 0, true, game, 0)
-            task.wait(0.01)
-            VirtualInputManager:SendMouseButtonEvent(mousePos.X, mousePos.Y, 0, false, game, 0)
+            mouse1click()
             task.wait(getgenv().ClickSpeed)
         else
             task.wait(0.1)
