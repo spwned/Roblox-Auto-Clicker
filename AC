@@ -9,7 +9,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AutoClickerGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
@@ -274,6 +274,17 @@ CloseButton.MouseLeave:Connect(function()
     TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 55)}):Play()
 end)
 
+local clickFunction = mouse1click or mouse1press and mouse1release and function()
+    mouse1press()
+    task.wait()
+    mouse1release()
+end
+
+if not clickFunction then
+    warn("No click function available on this executor!")
+    return
+end
+
 getgenv().AutoClickerRunning = true
 
 spawn(function()
@@ -281,7 +292,7 @@ spawn(function()
         if getgenv().AutoClicker and UserInputService:GetFocusedTextBox() == nil then
             local windowFocused = UserInputService.WindowFocused
             if windowFocused then
-                mouse1click()
+                clickFunction()
             end
             task.wait(getgenv().ClickSpeed)
         else
